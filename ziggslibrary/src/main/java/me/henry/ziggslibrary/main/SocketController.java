@@ -1,4 +1,4 @@
-package me.example.henry.ziggsudp.wrap;
+package me.henry.ziggslibrary.main;
 
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -12,7 +12,9 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
+
+import me.henry.ziggslibrary.callbacks.UdpDataWatcher;
+import me.henry.ziggslibrary.callbacks.ZiggsObservable;
 
 
 /**
@@ -20,8 +22,8 @@ import java.util.ArrayList;
  * socket操作类
  */
 
-public class ZiggsSocket {
-    private final String TAG = "ZiggsSocket";
+public class SocketController {
+    private final String TAG = "SocketController";
     long t1;
     Thread mThread;
     private static final int MSG_RECEIVE_DATA = 2701;
@@ -32,13 +34,14 @@ public class ZiggsSocket {
     private DatagramPacket receivePacket, sendPacket;
     private SocketAddress sendAddress;
     private byte[] currentReceiveByteData = null;
-    private ArrayList<DataCallBack> callbacks = new ArrayList<>();
     private HandlerThread mUIHandlerThread;
     private Handler mHandler;
     private int mTimeOut = 5;//默认超时时间
+    private ZiggsObservable mObservable;
 
 
-    public ZiggsSocket(String host, int port, int timeout) throws SocketException {
+    public SocketController(String host, int port, int timeout) throws SocketException {
+        mObservable = new ZiggsObservable();
         receivePacket = new DatagramPacket(receiveData, receiveData.length);
         mTimeOut = timeout;
         sendAddress = new InetSocketAddress(host, port);
@@ -80,7 +83,7 @@ public class ZiggsSocket {
         if (mSocket != null && receivePacket != null) {
             mSocket.receive(receivePacket);
         }
-        if (callbacks.size() > 0) {
+        if (mObservable.countObservers() > 0) {
             currentReceiveByteData = new byte[receivePacket.getLength()];
             try {
                 System.arraycopy(receivePacket.getData(), 0, currentReceiveByteData, 0, receivePacket.getLength());
@@ -89,6 +92,7 @@ public class ZiggsSocket {
                 e.printStackTrace();
             }
             //接收消息后休眠10毫秒
+            Log.e("heihei","aaaa");
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -139,7 +143,7 @@ public class ZiggsSocket {
             long curr = (System.currentTimeMillis() - (t1));
             if (curr > mTimeOut * 1000) {
                 Log.d(TAG, ((InetSocketAddress) sendAddress).getHostName() + ":" + ((InetSocketAddress) sendAddress).getPort() + "  UDP超时" + mTimeOut + "秒，伪超时数据返回。");
-                if (callbacks.size() > 0) {
+                if (mObservable.countObservers() > 0) {
                     mHandler.sendEmptyMessage(MSG_RECEIVE_TIMEOUT);
                     break;
                 }
@@ -182,14 +186,10 @@ public class ZiggsSocket {
                 super.handleMessage(msg);
                 switch (msg.what) {
                     case MSG_RECEIVE_DATA:
-                        for (int i = 0; i < callbacks.size(); i++) {
-                            callbacks.get(i).udp_receive(currentReceiveByteData, receivePacket.getAddress(), receivePacket.getPort());
-                        }
+                        mObservable.setData(currentReceiveByteData, receivePacket.getAddress(), receivePacket.getPort());
                         break;
                     case MSG_RECEIVE_TIMEOUT:
-                        for (int i = 0; i < callbacks.size(); i++) {
-                            callbacks.get(i).udp_receive("FFFFFF".getBytes(), null, 0);
-                        }
+                        mObservable.setData("FFFFFF".getBytes(), null, 0);
                         break;
 
                 }
@@ -197,11 +197,16 @@ public class ZiggsSocket {
             }
         };
     }
-    public void addCallBack(DataCallBack cb) {
-        callbacks.add(cb);
+
+    public void addWatcher(UdpDataWatcher watcher) {
+        mObservable.addObserver(watcher);
+
     }
 
-    public void removeAllCallback() {
-        callbacks.clear();
+    public void removeWatcher(UdpDataWatcher watcher) {
+        mObservable.deleteObserver(watcher);
+    }
+    public void removeAllWatchers() {
+        mObservable.deleteObservers();
     }
 }
