@@ -2,6 +2,13 @@
 udp发送工具类。具备发送超时返回自定义数据能力;处理回调无需切换ui线程
 
 # Usage:
+
+
+```java
+     compile 'com.henry.ziggsudp:ziggslibrary:1.0.2'
+```
+
+
 ## 1.在manifest添加权限以及service声明：
 
 ```xml
