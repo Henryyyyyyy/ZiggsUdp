@@ -24,6 +24,7 @@ public class SecondActivity extends AppCompatActivity implements UdpDataCallBack
         second_show=findViewById(R.id.second_show);
         watcher=new UdpDataWatcher(this);
         ZiggsUdp.getInstance().addWatcher(watcher);
+
         second_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

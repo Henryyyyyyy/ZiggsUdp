@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import java.net.InetAddress;
 
+import me.henry.ziggslibrary.UdpManager;
 import me.henry.ziggslibrary.ZiggsUdp;
 import me.henry.ziggslibrary.callbacks.UdpDataCallBack;
 import me.henry.ziggslibrary.callbacks.UdpDataWatcher;
@@ -57,11 +58,13 @@ public class ZiggsUdpActivity extends AppCompatActivity implements UdpDataCallBa
         tv_test.setText(new String(buffer) + count);
         count++;
 
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        UdpManager.getInstance().destoryUdpService();
 
     }
 }

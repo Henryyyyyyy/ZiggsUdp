@@ -15,6 +15,7 @@ import java.net.SocketException;
 
 import me.henry.ziggslibrary.callbacks.UdpDataWatcher;
 import me.henry.ziggslibrary.callbacks.ZiggsObservable;
+import me.henry.ziggslibrary.others.UdpConfigs;
 
 
 /**
@@ -189,7 +190,7 @@ public class SocketController {
                         mObservable.setData(currentReceiveByteData, receivePacket.getAddress(), receivePacket.getPort());
                         break;
                     case MSG_RECEIVE_TIMEOUT:
-                        mObservable.setData("FFFFFF".getBytes(), null, 0);
+                        mObservable.setData(UdpConfigs.TimeOut_Str.getBytes(), null, 0);
                         break;
 
                 }

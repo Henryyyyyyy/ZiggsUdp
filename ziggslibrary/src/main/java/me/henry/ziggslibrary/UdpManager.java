@@ -54,9 +54,12 @@ public class UdpManager {
         UdpConfigs.timeout = timeOut;
         return this;
     }
-
+    public UdpManager CustomTimeOutString(String str) {
+        UdpConfigs.TimeOut_Str = str;
+        return this;
+    }
     public UdpManager init() {
-        if ((UdpConfigs.port != -1) && (UdpConfigs.address != null) && (UdpConfigs.timeout != -1) && (mContext != null)) {
+        if ((UdpConfigs.port != -1) && (UdpConfigs.address != null) && (UdpConfigs.timeout != -1) && (mContext != null)&&UdpConfigs.TimeOut_Str!=null) {
             isReady = true;
         } else {
             isReady = false;
